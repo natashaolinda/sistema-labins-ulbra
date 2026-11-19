@@ -1,0 +1,382 @@
+{% extends 'agendamentos/base.html' %}
+
+{% block content %}
+
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                Gestão e Auditoria
+            </h3>
+
+            <p class="text-muted mb-0">
+                Controle de acessos, rastreabilidade de ações
+                e relatórios de ocupação dos laboratórios.
+            </p>
+        </div>
+
+        {% if request.user.is_superuser or request.user.perfil.eh_chefe_ti %}
+            <span class="badge p-2"
+                  style="background-color: #c49a5b; color: white;">
+                Perfil: Chefia de TI
+            </span>
+        {% else %}
+            <span class="badge bg-secondary p-2">
+                Perfil: TI
+            </span>
+        {% endif %}
+
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show"
+                 role="alert">
+
+                {{ message }}
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Fechar">
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-sm border-0 mb-5">
+
+        <div class="card-header bg-success py-3">
+            <h6 class="fw-bold text-white mb-0">
+                Relatórios de Ocupação dos Laboratórios
+            </h6>
+        </div>
+
+        <div class="card-body">
+
+            <p class="text-muted small mb-3">
+                Os relatórios apresentam os agendamentos confirmados
+                dos laboratórios em um período, incluindo professores,
+                disciplinas, cursos e quantidade prevista de alunos
+                atendidos. Os dados originais permanecem armazenados
+                no sistema.
+            </p>
+
+            {% if request.user.is_superuser or request.user.perfil.eh_chefe_ti %}
+
+                <form method="POST"
+                      action="{% url 'gerar_relatorio_ocupacao' %}"
+                      class="row g-3 align-items-end mb-4">
+
+                    {% csrf_token %}
+
+                    <div class="col-md-3">
+                        <label for="data_inicio"
+                               class="form-label fw-semibold">
+                            Data inicial
+                        </label>
+
+                        <input type="date"
+                               id="data_inicio"
+                               name="data_inicio"
+                               class="form-control"
+                               required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="data_fim"
+                               class="form-label fw-semibold">
+                            Data final
+                        </label>
+
+                        <input type="date"
+                               id="data_fim"
+                               name="data_fim"
+                               class="form-control"
+                               required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="formato"
+                               class="form-label fw-semibold">
+                            Formato do relatório
+                        </label>
+
+                        <select id="formato"
+                                name="formato"
+                                class="form-select"
+                                required>
+
+                            <option value="xlsx">
+                                Excel (.xlsx)
+                            </option>
+
+                            <option value="pdf">
+                                PDF (.pdf)
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <button type="submit"
+                                class="btn w-100 fw-bold text-white"
+                                style="background-color: #c49a5b;">
+                            Gerar Relatório
+                        </button>
+                    </div>
+
+                </form>
+
+            {% endif %}
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light text-secondary small">
+                        <tr>
+                            <th class="ps-3">Período</th>
+                            <th>Data de Geração</th>
+                            <th>Responsável</th>
+                            <th>Formato</th>
+                            <th class="text-end pe-3">
+                                Arquivo / Ações
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for relatorio in relatorios %}
+
+                            <tr>
+
+                                <td class="ps-3">
+                                    <strong>
+                                        {{ relatorio.periodo }}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    {{ relatorio.data_geracao|date:"d/m/Y H:i" }}
+                                </td>
+
+                                <td>
+                                    {% if relatorio.gerado_por %}
+                                        {{ relatorio.gerado_por.get_full_name|default:relatorio.gerado_por.username }}
+                                    {% else %}
+                                        Usuário não disponível
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if relatorio.arquivo %}
+
+                                        {% with nome_arquivo=relatorio.arquivo.name|lower %}
+
+                                            {% if nome_arquivo|slice:"-5:" == ".xlsx" %}
+                                                <span class="badge bg-success">
+                                                    Excel
+                                                </span>
+
+                                            {% elif nome_arquivo|slice:"-4:" == ".pdf" %}
+                                                <span class="badge bg-danger">
+                                                    PDF
+                                                </span>
+
+                                            {% else %}
+                                                <span class="badge bg-secondary">
+                                                    Arquivo
+                                                </span>
+                                            {% endif %}
+
+                                        {% endwith %}
+
+                                    {% else %}
+                                        <span class="text-muted small">
+                                            Indisponível
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-end pe-3">
+
+                                    {% if request.user.is_superuser or request.user.perfil.eh_chefe_ti %}
+
+                                        {% if relatorio.arquivo %}
+
+                                            {% with nome_arquivo=relatorio.arquivo.name|lower %}
+
+                                                <a href="{% url 'baixar_relatorio_ocupacao' relatorio.id %}"
+                                                   class="btn btn-sm btn-outline-primary me-1">
+
+                                                    {% if nome_arquivo|slice:"-5:" == ".xlsx" %}
+                                                        Baixar Excel
+
+                                                    {% elif nome_arquivo|slice:"-4:" == ".pdf" %}
+                                                        Baixar PDF
+
+                                                    {% else %}
+                                                        Baixar Arquivo
+                                                    {% endif %}
+
+                                                </a>
+
+                                            {% endwith %}
+
+                                        {% else %}
+
+                                            <span class="text-muted small me-2">
+                                                Arquivo indisponível
+                                            </span>
+
+                                        {% endif %}
+
+                                        <form method="POST"
+                                              action="{% url 'excluir_relatorio_ocupacao' relatorio.id %}"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Tem certeza que deseja excluir este relatório? O arquivo será removido, mas os agendamentos serão preservados.');">
+
+                                            {% csrf_token %}
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger">
+                                                Excluir
+                                            </button>
+
+                                        </form>
+
+                                    {% else %}
+
+                                        <span class="text-muted small">
+                                            Somente Chefia de TI
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="5"
+                                    class="text-center py-4 text-muted">
+                                    Nenhum relatório de ocupação
+                                    gerado ainda.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-success py-3">
+            <h6 class="fw-bold text-white mb-0">
+                Histórico de Alterações
+            </h6>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive"
+                 style="max-height: 500px; overflow-y: auto;">
+
+                <table class="table table-hover table-sm align-middle mb-0">
+
+                    <thead class="table-light text-secondary small sticky-top">
+                        <tr>
+                            <th class="ps-3">ID Reserva</th>
+                            <th>Data</th>
+                            <th>Usuário</th>
+                            <th>Campo</th>
+                            <th>Atualizar</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for log in logs %}
+
+                            <tr>
+
+                                <td class="ps-3 fw-bold text-secondary">
+                                    {{ log.agendamento_id|default:"-" }}
+                                </td>
+
+                                <td class="small text-muted">
+                                    {{ log.data_hora|date:"d-m-Y" }}
+                                    <br>
+                                    {{ log.data_hora|time:"H:i" }}
+                                </td>
+
+                                <td class="small fw-semibold">
+
+                                    {% if log.usuario %}
+
+                                        {{ log.usuario.get_full_name|default:log.usuario.username }}
+
+                                        <br>
+
+                                        <span class="text-muted fw-normal">
+                                            ({{ log.usuario.id }})
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="text-danger fst-italic">
+                                            Sistema / Não Registrado
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td class="small text-dark">
+                                    {{ log.campo_alterado }}
+                                </td>
+
+                                <td class="small text-dark">
+                                    {{ log.detalhe_atualizacao }}
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="5"
+                                    class="text-center py-4 text-muted">
+                                    Nenhum registro de auditoria encontrado.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

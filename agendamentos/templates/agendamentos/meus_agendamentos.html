@@ -1,0 +1,166 @@
+<!--
+ARQUIVO: agendamentos/templates/agendamentos/meus_agendamentos.html
+FINALIDADE: Painel do docente para consulta de reservas e cancelamento de aulas futuras.
+-->
+{% extends 'agendamentos/base.html' %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    
+    <!-- CABEÇALHO: Título e botão para criar nova reserva -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-primary mb-1">Meus Agendamentos</h3>
+            <p class="text-muted mb-0">Consulte suas reservas confirmadas ou cancele agendamentos não utilizados.</p>
+        </div>
+        <a href="{% url 'lista_laboratorios' %}" class="btn btn-primary fw-semibold">
+            + Novo Agendamento
+        </a>
+    </div>
+
+    <!-- ÁREA DE DADOS: Verifica se o professor tem alguma reserva registada -->
+    {% if agendamentos %}
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Laboratório</th>
+                                <th>Disciplina / Atividade</th>
+                                <th>Data</th>
+                                <th>Turno e Horário</th>
+                                <th>Alunos</th>
+                                <th>Datashow</th>
+                                <th class="text-end pe-4">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- LOOP: Itera sobre todas as reservas do utilizador logado -->
+                            {% for ag in agendamentos %}
+                            <tr>
+                                <!-- COLUNA 1: Nome e Localização -->
+                                <td class="ps-4">
+                                    <strong>{{ ag.laboratorio.nome }}</strong>
+                                    <div class="small text-muted">{{ ag.laboratorio.localizacao }}</div>
+                                </td>
+                                
+                                <!-- COLUNA 2: Disciplina e Observações -->
+                                <td>
+                                    <span class="fw-semibold text-dark">{{ ag.disciplina }}</span>
+                                    {% if ag.descricao %}
+                                        <div class="small text-muted text-truncate" style="max-width: 180px;" title="{{ ag.descricao }}">
+                                            Obs: {{ ag.descricao }}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- COLUNA 3: Data formatada -->
+                                <td>
+                                    <span class="badge bg-light text-dark border fs-6">
+                                        {{ ag.data|date:"d/m/Y" }}
+                                    </span>
+                                </td>
+                                
+                                <!-- COLUNA 4: Turno e limite de horas -->
+                                <td>
+                                    <div><strong>{{ ag.get_turno_display }}</strong></div>
+                                    <small class="text-muted">{{ ag.horario_inicio|time:"H:i" }} às {{ ag.horario_fim|time:"H:i" }}</small>
+                                </td>
+                                
+                                <!-- COLUNA 5: Vagas solicitadas -->
+                                <td>
+                                    <span class="badge bg-secondary">{{ ag.quantidade_alunos }} vagas</span>
+                                </td>
+                                
+                                <!-- COLUNA 6: Infraestrutura visual -->
+                                <td>
+                                    {% if ag.laboratorio.tem_datashow %}
+                                        <span class="badge bg-success">Possui</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Não possui</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- COLUNA 7: Botões de Ação Dinâmicos -->
+                                <td class="text-end pe-4">
+                                    
+                                    <!-- LÓGICA DE STATUS: Só exibe botões se a reserva estiver Ativa/Confirmada ('C') -->
+                                    {% if ag.status == 'C' %}
+                                        <div class="d-inline-flex gap-2 align-items-center">
+                                            
+                                            <!-- Botão de Recibo (Sempre visível para reservas confirmadas) -->
+                                            <a href="{% url 'reserva_sucesso' ag.id %}" class="btn btn-sm btn-outline-primary" title="Ver Comprovante">
+                                                Recibo
+                                            </a>
+                                            
+                                            <!-- Verifica se a data da reserva ainda não passou para permitir o cancelamento -->
+                                            {% if ag.pode_cancelar %}
+                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalCancelar{{ ag.id }}">
+                                                    Cancelar
+                                                </button>
+                                                
+                                                <!-- MODAL DE CONFIRMAÇÃO DE CANCELAMENTO (Invisível até clicar no botão) -->
+                                                <div class="modal fade" id="modalCancelar{{ ag.id }}" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content text-start">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title fw-bold text-danger">Confirmar Cancelamento</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>Deseja realmente cancelar a reserva do <strong>{{ ag.laboratorio.nome }}</strong> para o dia <strong>{{ ag.data|date:"d/m/Y" }}</strong> ({{ ag.horario_inicio|time:"H:i" }} às {{ ag.horario_fim|time:"H:i" }})?</p>
+                                                                <p class="text-muted small mb-0">Esta ação liberará imediatamente a sala para outros docentes e enviará notificação à TI.</p>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Manter Reserva</button>
+                                                                <!-- Formulário de disparo do cancelamento para o backend (views.py) -->
+                                                                <form method="POST" action="{% url 'cancelar_reserva' ag.id %}" class="d-inline">
+                                                                    {% csrf_token %}
+                                                                    <button type="submit" class="btn btn-danger">Sim, Cancelar</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                            {% else %}
+                                                <!-- Etiqueta exibida caso a aula já tenha acontecido no passado -->
+                                                <span class="badge bg-light text-muted border py-2 px-2" title="Esta aula já ocorreu e permanece no histórico para auditoria.">
+                                                    Realizada
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                    <!-- LÓGICA DE STATUS: Se o utilizador logado cancelou ('X') -->
+                                    {% elif ag.status == 'X' %}
+                                        <span class="badge bg-danger py-2 px-2">Cancelado (Docente)</span>
+                                        
+                                    <!-- LÓGICA DE STATUS: Se a Chefia/Técnicos cancelaram ('T') -->
+                                    {% elif ag.status == 'T' %}
+                                        <span class="badge bg-dark py-2 px-2">Cancelado (TI)</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+    <!-- TELA VAZIA: O que mostrar se o professor nunca tiver feito uma reserva -->
+    {% else %}
+        <div class="card shadow-sm border-0 text-center py-5">
+            <div class="card-body">
+                <div class="display-6 text-muted mb-3">📅</div>
+                <h5 class="fw-bold text-secondary">Ainda não possui agendamentos registados.</h5>
+                <p class="text-muted">Consulte a disponibilidade dos laboratórios e garanta o espaço para as suas aulas.</p>
+                <a href="{% url 'lista_laboratorios' %}" class="btn btn-primary mt-2">
+                    Consultar e Reservar Laboratórios
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

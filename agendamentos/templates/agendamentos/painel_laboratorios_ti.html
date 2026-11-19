@@ -1,0 +1,150 @@
+{% extends 'agendamentos/base.html' %}
+
+{% block content %}
+<div class="container mt-3 mb-5">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Gestão de Laboratórios</h3>
+            <p class="text-muted mb-0">
+                Controle de capacidade, equipamentos e status operacional das salas.
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            {% if request.user.is_superuser or request.user.perfil.eh_chefe_ti %}
+                <a href="{% url 'cadastrar_laboratorio' %}"
+                   class="btn btn-success btn-sm fw-semibold shadow-sm">
+                    Adicionar Laboratório
+                </a>
+            {% endif %}
+
+            <a href="{% url 'painel_ti' %}"
+               class="btn btn-sm fw-semibold text-white shadow-sm"
+               style="background-color: #c49a5b; border-color: #c49a5b;">
+                Voltar ao Painel Operacional
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-success py-3 d-flex justify-content-between align-items-center">
+            <h6 class="fw-bold text-white mb-0">
+                Infraestrutura dos Laboratórios
+            </h6>
+
+            <span class="badge bg-light text-dark">
+                {{ laboratorios|length }} sala(s)
+            </span>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light text-secondary small">
+                        <tr>
+                            <th scope="col" class="ps-3">Laboratório</th>
+                            <th scope="col">Capacidade</th>
+                            <th scope="col">Status Operacional</th>
+                            <th scope="col" class="text-end pe-4">
+                                <div class="d-inline-block text-start"
+                                     style="width: 165px;">
+                                    Ações
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for lab in laboratorios %}
+                            <tr>
+
+                                <td class="ps-3">
+                                    <strong>{{ lab.nome }}</strong>
+
+                                    <div class="small text-muted">
+                                        {{ lab.localizacao }}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {{ lab.capacidade }} alunos
+                                </td>
+
+                                <td>
+                                    {% if lab.em_manutencao %}
+                                        <span class="badge bg-danger">
+                                            Em Manutenção
+                                        </span>
+
+                                        {% if lab.justificativa_bloqueio %}
+                                            <div class="small text-danger fw-semibold mt-1">
+                                                {{ lab.justificativa_bloqueio }}
+                                            </div>
+                                        {% endif %}
+
+                                    {% else %}
+                                        <span class="badge bg-success">
+                                            Disponível
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex flex-column gap-2"
+                                         style="width: 165px;">
+
+                                        <a href="{% url 'editar_laboratorio_ti' lab.id %}"
+                                           class="btn btn-sm fw-semibold text-white w-100"
+                                           style="background-color: #c49a5b; border-color: #c49a5b;">
+                                            Editar Infraestrutura
+                                        </a>
+
+                                        {% if request.user.is_superuser or request.user.perfil.eh_chefe_ti %}
+
+                                            <form method="POST"
+                                                  action="{% url 'painel_laboratorios_ti' %}"
+                                                  onsubmit="return confirm('Tem certeza que deseja excluir este laboratório? A exclusão não poderá ser desfeita.');">
+
+                                                {% csrf_token %}
+
+                                                <input type="hidden"
+                                                       name="excluir_laboratorio_id"
+                                                       value="{{ lab.id }}">
+
+                                                <button type="submit"
+                                                        class="btn btn-outline-danger btn-sm fw-semibold w-100">
+                                                    Excluir Laboratório
+                                                </button>
+
+                                            </form>
+
+                                        {% endif %}
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5">
+                                    <h5 class="text-muted mb-0">
+                                        Nenhum laboratório cadastrado.
+                                    </h5>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

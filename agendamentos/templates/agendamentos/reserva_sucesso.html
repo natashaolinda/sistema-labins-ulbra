@@ -1,0 +1,179 @@
+<!-- 
+ARQUIVO: agendamentos/templates/agendamentos/reserva_sucesso.html
+FINALIDADE: Exibir o comprovativo digital ("recibo") após uma reserva bem-sucedida.
+HERANÇA: Estende o template base (herda navbar, estilos globais e rodapé).
+-->
+{% extends 'agendamentos/base.html' %}
+
+{% block content %}
+
+<!-- 
+BLOCO DE ESTILOS ESPECÍFICOS (TELA DE SUCESSO):
+Garante que o cabeçalho e o botão inferior usem rigorosamente o Verde Ulbra (#114B36),
+sobrepondo qualquer classe padrão azul (primary) ou verde claro (success) do Bootstrap.
+-->
+<style>
+    /* Força o cabeçalho a usar o Verde Ulbra e garante que todos os textos internos sejam brancos */
+    .cabecalho-ulbra {
+        background-color: #114B36 !important;
+        color: #FFFFFF !important;
+    }
+    .cabecalho-ulbra h3, .cabecalho-ulbra p, .cabecalho-ulbra div {
+        color: #FFFFFF !important;
+    }
+    
+    /* Remove o contorno azul do botão inferior e aplica o Verde Ulbra com efeito de preenchimento ao passar o rato */
+    .btn-voltar-ulbra {
+        color: #114B36 !important;
+        border: 1px solid #114B36 !important;
+        background-color: transparent !important;
+        transition: all 0.3s ease;
+    }
+    .btn-voltar-ulbra:hover {
+        background-color: #114B36 !important;
+        color: #FFFFFF !important;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            
+            <div class="card shadow border-0">
+                <!-- CABEÇALHO DO COMPROVANTE: Utiliza a nova classe cabecalho-ulbra para garantir a cor institucional -->
+                <div class="card-header cabecalho-ulbra text-center py-4">
+                    <div class="display-4 mb-2">✓</div>
+                    <h3 class="fw-bold mb-1">Agendamento Confirmado!</h3>
+                    <p class="mb-0 small">
+                        Sua reserva foi realizada com sucesso e o laboratório já está garantido para sua aula.
+                    </p>
+                </div>
+
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">
+                        Resumo do Agendamento
+                    </h5>
+
+                    <!-- LISTA DE DADOS: Extrai as informações da variável 'agendamento' enviada pela views.py -->
+                    <ul class="list-group list-group-flush mb-4">
+                        <!-- Nome e sala física do laboratório -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Laboratório:</span>
+                            <span class="fw-bold text-dark">
+                                {{ agendamento.laboratorio.nome }} 
+                                <small class="text-muted">({{ agendamento.laboratorio.localizacao }})</small>
+                            </span>
+                        </li>
+
+                        <!-- Nome do docente que efetuou a reserva -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Docente:</span>
+                            <span class="fw-semibold text-dark">{{ agendamento.professor }}</span>
+                        </li>
+
+                        <!-- Disciplina da aula -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Disciplina:</span>
+                            <span class="text-dark">{{ agendamento.disciplina }}</span>
+                        </li>
+
+                        <!-- Data formatada no padrão brasileiro (dia/mês/ano) -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Data da Aula:</span>
+                            <span class="fw-bold text-primary">
+                                {{ agendamento.data|date:"d/m/Y" }}
+                            </span>
+                        </li>
+
+                        <!-- Turno (usa get_turno_display para renderizar o texto legível em vez da sigla do banco) -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Turno:</span>
+                            <span class="badge bg-primary">
+                                {{ agendamento.get_turno_display }}
+                            </span>
+                        </li>
+
+                        <!-- Horários de início e término formatados (hora:minuto) -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Horário da Reserva:</span>
+                            <span class="fw-bold text-dark">
+                                {{ agendamento.horario_inicio|time:"H:i" }} às {{ agendamento.horario_fim|time:"H:i" }}
+                            </span>
+                        </li>
+
+                        <!-- Quantidade de alunos previstos para a aula -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Alunos Previstos:</span>
+                            <span class="text-dark">{{ agendamento.quantidade_alunos }} alunos</span>
+                        </li>
+
+                        <!-- Observações: Bloco condicional que só é renderizado se o docente preencheu o campo -->
+                        {% if agendamento.descricao %}
+                            <li class="list-group-item px-0">
+                                <span class="text-muted d-block mb-1">Observações da Aula:</span>
+                                <div class="bg-light p-2 rounded small text-secondary">
+                                    {{ agendamento.descricao }}
+                                </div>
+                            </li>
+                        {% endif %}
+                    </ul>
+
+                    <!-- PAINEL DE INFRAESTRUTURA E DIRETRIZES TÉCNICAS DA TI -->
+                    <div class="alert alert-light border shadow-sm rounded-3 mb-4">
+                        <h6 class="fw-bold text-dark mb-2">📌 Informações Importantes sobre o Espaço:</h6>
+                        
+                        <ul class="mb-0 ps-3 small text-secondary">
+                            <!-- Capacidade máxima estática cadastrada no modelo do laboratório -->
+                            <li class="mb-2">
+                                <strong>Capacidade Máxima:</strong> Este laboratório possui 
+                                <strong>{{ agendamento.laboratorio.capacidade }} postos de trabalho</strong> disponíveis.
+                            </li>
+
+                            <!-- Validação booleana: Exibe alerta de sucesso se tem projetor, ou alerta de erro se não tem -->
+                            <li class="mb-2">
+                                <strong>Datashow / Projeção:</strong> 
+                                {% if agendamento.laboratorio.tem_datashow %}
+                                    <span class="text-success fw-semibold">
+                                        Equipado com Datashow fixo funcional.
+                                    </span>
+                                {% else %}
+                                    <span class="text-danger fw-semibold">
+                                        Este laboratório não dispõe de Datashow fixo.
+                                    </span> 
+                                    Caso necessite de projeção, solicite com antecedência um projetor móvel junto a Central de Apoio ao Docente.
+                                {% endif %}
+                            </li>
+
+                            <!-- Orientação fixa sobre a política de contingência de salas da equipe de TI -->
+                            <li>
+                                <strong>Acompanhamento da TI:</strong> 
+                                Sua reserva já está garantida. Caso surja qualquer imprevisto técnico (como manutenção de rotina ou climatização) e seja necessário remanejar a sala, a equipe de TI entrará em contato previamente com você pelo e-mail institucional.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- GRUPO DE BOTÕES DE AÇÃO FINAL -->
+                    <div class="d-grid gap-2">
+                        <!-- Botão primário (Dourado, via CSS global): Redireciona para o histórico do professor -->
+                        <a href="{% url 'meus_agendamentos' %}" class="btn btn-primary fw-semibold">
+                            Ir para Meus Agendamentos
+                        </a>
+
+                        <!-- Botão secundário: Utiliza a nova classe btn-voltar-ulbra para forçar o Verde Institucional em vez do azul padrão -->
+                        <a href="{% url 'lista_laboratorios' %}" class="btn btn-voltar-ulbra fw-semibold">
+                            Voltar para a Lista de Laboratórios
+                        </a>
+
+                        <!-- Função JavaScript nativa para disparar a janela de impressão (Geração de PDF ou Impressora física) -->
+                        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
+                            🖨 Imprimir Comprovante
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

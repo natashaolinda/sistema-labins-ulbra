@@ -1,0 +1,89 @@
+{% extends 'agendamentos/base.html' %}
+
+{% block content %}
+<div class="container mt-4 mb-5" style="max-width: 700px;">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="mb-0 fw-bold">✏️ Ajuste Operacional de Agendamento (TI)</h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="alert alert-info small mb-4">
+                <strong>Atenção:</strong> Ao salvar as alterações, um e-mail de notificação será enviado automaticamente para o docente <strong>{{ reserva.usuario.email }}</strong> com os dados atualizados.
+            </div>
+
+            {% if form.errors %}
+                <div class="alert alert-danger small mb-4">
+                    <strong>Não foi possível salvar:</strong>
+                    {{ form.non_field_errors }}
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <div>• {{ field.label }}: {{ error }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Docente Titular:</label>
+                    <input type="text" class="form-control bg-light" value="{{ reserva.professor }} ({{ reserva.usuario.email }})" disabled>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Disciplina:</label>
+                    <input type="text" class="form-control bg-light" value="{{ reserva.disciplina }}" disabled>
+                </div>
+
+                {% if reserva.descricao %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-danger">Observações / Pedidos do Docente na Reserva:</label>
+                    <input type="text" class="form-control bg-light border-danger-subtle" value="{{ reserva.descricao }}" disabled>
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Alocar Laboratório:</label>
+                    {{ form.laboratorio }}
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Data:</label>
+                        {{ form.data }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Turno:</label>
+                        {{ form.turno }}
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Início:</label>
+                        {{ form.horario_inicio }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Término:</label>
+                        {{ form.horario_fim }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Qtd. Alunos:</label>
+                        {{ form.quantidade_alunos }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Justificativa da TI (Motivo da Alteração):</label>
+                    {{ form.justificativa_ti }}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'painel_ti' %}" class="btn btn-outline-secondary">Voltar ao Painel</a>
+                    <button type="submit" class="btn btn-primary fw-semibold">Salvar e Notificar Docente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

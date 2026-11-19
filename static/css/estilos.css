@@ -1,0 +1,143 @@
+:root {
+    --ulbra-verde: #114B36;
+    --ulbra-dourado: #C99B62;
+    --ulbra-dourado-hover: #b58954;
+    --ulbra-branco: #FFFFFF;
+}
+
+/* Forçar a barra superior a ser verde */
+.navbar {
+    background-color: var(--ulbra-verde) !important;
+}
+
+/* Links do Menu (Brancos por padrão, dourados ao passar o rato) */
+.navbar-nav .nav-link {
+    color: var(--ulbra-branco) !important;
+    transition: color 0.3s ease;
+    font-weight: 500;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--ulbra-dourado) !important;
+}
+
+/* Ajuste da cor da linha divisória */
+.border-start {
+    border-left-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ---------------------------------------------------
+   SUBSTITUIÇÃO DE CORES DO BOOTSTRAP (Tirar Azul/Preto)
+   --------------------------------------------------- */
+
+/* Textos escuros e títulos azuis passam a Verde Ulbra */
+h1, h2, h3, h4, h5, h6, .text-primary, .text-dark, body {
+    color: var(--ulbra-verde) !important;
+}
+
+/* Botões Azuis passam a Dourado */
+.btn-primary {
+    background-color: var(--ulbra-dourado) !important;
+    border-color: var(--ulbra-dourado) !important;
+    color: var(--ulbra-branco) !important;
+}
+.btn-primary:hover {
+    background-color: var(--ulbra-dourado-hover) !important;
+    border-color: var(--ulbra-dourado-hover) !important;
+}
+
+/* Badges e fundos azuis passam a Dourado */
+.bg-primary {
+    background-color: var(--ulbra-dourado) !important;
+}
+
+/* Botões Verdes (Sucesso) passam a Verde Ulbra */
+.btn-success {
+    background-color: var(--ulbra-verde) !important;
+    border-color: var(--ulbra-verde) !important;
+    color: var(--ulbra-branco) !important;
+}
+.btn-success:hover {
+    background-color: #0d3828 !important;
+    border-color: #0d3828 !important;
+}
+/* ---------------------------------------------------
+   AJUSTES DA TELA DE RESERVAS E CARTÕES
+   --------------------------------------------------- */
+
+/* 1. Remover bordas e títulos azuis dos cartões dos laboratórios */
+.card {
+    border-color: var(--ulbra-dourado) !important;
+}
+.card-title, .card-title a {
+    color: var(--ulbra-verde) !important;
+    font-weight: 700;
+}
+
+/* 2. Escurecer o painel de "Laboratórios livres" para o Verde Ulbra */
+.alert-success {
+    background-color: var(--ulbra-verde) !important;
+    color: var(--ulbra-branco) !important;
+    border: 1px solid var(--ulbra-dourado) !important;
+}
+
+/* Ajuste do botão "Limpar Filtros" para combinar com o fundo escuro */
+.alert-success .btn {
+    color: var(--ulbra-branco) !important;
+    border-color: var(--ulbra-dourado) !important;
+}
+.alert-success .btn:hover {
+    background-color: var(--ulbra-dourado) !important;
+}
+
+/* 3. Padronizar as cores das tags de Softwares (Remover coloridos do Bootstrap) */
+.card-body .badge {
+    background-color: #f6efe6 !important; /* Fundo dourado bem claro */
+    color: var(--ulbra-verde) !important; /* Texto no verde principal */
+    border: 1px solid var(--ulbra-dourado) !important;
+    font-weight: 600 !important;
+    margin-bottom: 5px;
+}
+/* Transformar o painel azul de informação (alert-info) em Verde Ulbra */
+.alert-info {
+    background-color: var(--ulbra-verde) !important;
+    color: var(--ulbra-branco) !important;
+    border: 1px solid var(--ulbra-dourado) !important;
+}
+
+/* Garantir que os links dentro desse painel fiquem visíveis (dourados) */
+.alert-info a {
+    color: var(--ulbra-dourado) !important;
+    font-weight: bold;
+}
+/* Apanhar outras possíveis classes azuis do Bootstrap */
+.alert-primary, .bg-info, .bg-info.bg-opacity-10 {
+    background-color: var(--ulbra-verde) !important;
+    color: var(--ulbra-branco) !important;
+    border: 1px solid var(--ulbra-dourado) !important;
+}
+/* ---------------------------------------------------
+   AJUSTES DA TELA DE SUCESSO (COMPROVANTE)
+   --------------------------------------------------- */
+
+/* Forçar o cabeçalho de sucesso a ter fundo Verde Ulbra e letras Brancas */
+.bg-success, 
+.bg-success h1, 
+.bg-success h2, 
+.bg-success h3, 
+.bg-success h4,
+.bg-success p {
+    background-color: var(--ulbra-verde) !important;
+    color: var(--ulbra-branco) !important;
+}
+
+/* Substituir os botões com borda azul (btn-outline-primary) pelas cores da Ulbra */
+.btn-outline-primary {
+    color: var(--ulbra-verde) !important;
+    border-color: var(--ulbra-verde) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--ulbra-verde) !important;
+    color: var(--ulbra-branco) !important;
+}

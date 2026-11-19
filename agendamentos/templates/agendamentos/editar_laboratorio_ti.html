@@ -1,0 +1,73 @@
+{% extends 'agendamentos/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Editar: {{ laboratorio.nome }}</h2>
+    <p class="text-muted">Atualize a capacidade, os softwares instalados e o status de manutenção.</p>
+
+    <div class="card shadow-sm p-4 mt-3">
+        <form method="post">
+            {% csrf_token %}
+            
+            <h5 class="mb-3 border-bottom pb-2">Status Operacional</h5>
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-4">
+                    <div class="form-check form-switch fs-5">
+                        {{ form.em_manutencao }}
+                        <label class="form-check-label text-danger fw-bold" for="{{ form.em_manutencao.id_for_label }}">
+                            Bloquear (Em Manutenção)
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label fw-semibold mb-1">Justificativa do Bloqueio:</label>
+                    {{ form.justificativa_bloqueio }}
+                </div>
+            </div>
+
+            <h5 class="mb-3 border-bottom pb-2">Infraestrutura e Softwares</h5>
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold mb-1">Capacidade (Alunos):</label>
+                    {{ form.capacidade }}
+                </div>
+                <div class="col-md-8 pt-4">
+                    <div class="form-check">
+                        {{ form.tem_datashow }}
+                        <label class="form-check-label fw-semibold" for="{{ form.tem_datashow.id_for_label }}">
+                            Datashow Fixo Instalado
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold d-block mb-2">Programas Instalados (selecione um ou mais):</label>
+                <div class="p-3 bg-light border rounded">
+                    <div class="row g-2">
+                        {% for checkbox in form.softwares %}
+                            <div class="col-md-4 col-sm-6">
+                                <div class="form-check">
+                                    {{ checkbox.tag }}
+                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                        {{ checkbox.choice_label }}
+                                    </label>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12 text-muted">
+                                Nenhum software cadastrado no banco de dados. Adicione os programas pelo painel Admin.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">Guardar Alterações</button>
+                <a href="{% url 'painel_laboratorios_ti' %}" class="btn btn-outline-secondary ms-2">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

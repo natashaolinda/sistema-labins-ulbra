@@ -1,0 +1,243 @@
+
+{% extends 'agendamentos/base.html' %}
+
+{% block content %}
+<div class="container mt-3 mb-5">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Cadastrar Laboratório</h3>
+            <p class="text-muted mb-0">
+                Cadastro de novos espaços e recursos de infraestrutura.
+            </p>
+        </div>
+
+        <a href="{% url 'painel_laboratorios_ti' %}"
+           class="btn btn-sm fw-semibold text-white shadow-sm"
+           style="background-color: #c49a5b; border-color: #c49a5b;">
+            Voltar aos Laboratórios
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-success py-3">
+            <h6 class="fw-bold text-white mb-0">
+                Informações do Laboratório
+            </h6>
+        </div>
+
+        <div class="card-body p-4">
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3">
+                    Identificação do Espaço
+                </h6>
+
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-6">
+                        <label for="{{ form.nome.id_for_label }}"
+                               class="form-label fw-semibold">
+                            Nome do Laboratório
+                        </label>
+
+                        {{ form.nome }}
+
+                        <div class="text-danger small">
+                            {{ form.nome.errors.0 }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="{{ form.capacidade.id_for_label }}"
+                               class="form-label fw-semibold">
+                            Capacidade de Alunos
+                        </label>
+
+                        {{ form.capacidade }}
+
+                        <div class="text-danger small">
+                            {{ form.capacidade.errors.0 }}
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="{{ form.localizacao.id_for_label }}"
+                               class="form-label fw-semibold">
+                            Localização Física
+                        </label>
+
+                        {{ form.localizacao }}
+
+                        <div class="text-danger small">
+                            {{ form.localizacao.errors.0 }}
+                        </div>
+                    </div>
+
+                </div>
+
+                <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3">
+                    Equipamentos e Softwares
+                </h6>
+
+                <div class="form-check mb-3">
+                    {{ form.tem_datashow }}
+
+                    <label for="{{ form.tem_datashow.id_for_label }}"
+                           class="form-check-label fw-semibold">
+                        Possui Datashow Fixo
+                    </label>
+
+                    <div class="text-danger small">
+                        {{ form.tem_datashow.errors.0 }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Softwares Instalados
+                    </label>
+
+                    <div class="border rounded bg-light p-3">
+
+                        <div class="row row-cols-1 row-cols-md-2 g-2">
+
+                            {% for opcao in form.softwares %}
+
+                                <div class="col">
+                                    <div class="form-check">
+                                        {{ opcao.tag }}
+
+                                        <label class="form-check-label"
+                                               for="{{ opcao.id_for_label }}">
+                                            {{ opcao.choice_label }}
+                                        </label>
+                                    </div>
+                                </div>
+
+                            {% empty %}
+
+                                <div class="col text-muted small">
+                                    Nenhum software cadastrado.
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+                    </div>
+
+                    <div class="form-text">
+                        Selecione os programas já disponíveis no sistema.
+                    </div>
+
+                    <div class="text-danger small">
+                        {{ form.softwares.errors.0 }}
+                    </div>
+
+                </div>
+
+                <div class="mb-4">
+
+                    <label for="{{ form.novo_software.id_for_label }}"
+                           class="form-label fw-semibold">
+                        {{ form.novo_software.label }}
+                    </label>
+
+                    {{ form.novo_software }}
+
+                    <div class="form-text">
+                        Caso o software não esteja na lista acima,
+                        informe seu nome para cadastrá-lo.
+                        O campo é opcional.
+                    </div>
+
+                    <div class="text-danger small">
+                        {{ form.novo_software.errors.0 }}
+                    </div>
+
+                </div>
+
+                <div class="mb-4">
+
+                    <label for="{{ form.descricao_programas.id_for_label }}"
+                           class="form-label fw-semibold">
+                        Observações de Infraestrutura
+                    </label>
+
+                    {{ form.descricao_programas }}
+
+                    <div class="text-danger small">
+                        {{ form.descricao_programas.errors.0 }}
+                    </div>
+
+                </div>
+
+                <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3">
+                    Situação Operacional
+                </h6>
+
+                <div class="form-check mb-3">
+
+                    {{ form.em_manutencao }}
+
+                    <label for="{{ form.em_manutencao.id_for_label }}"
+                           class="form-check-label fw-semibold">
+                        Laboratório em Manutenção
+                    </label>
+
+                    <div class="form-text">
+                        Laboratórios em manutenção não aparecem
+                        na consulta de disponibilidade dos professores.
+                    </div>
+
+                    <div class="text-danger small">
+                        {{ form.em_manutencao.errors.0 }}
+                    </div>
+
+                </div>
+
+                <div class="mb-4">
+
+                    <label for="{{ form.justificativa_bloqueio.id_for_label }}"
+                           class="form-label fw-semibold">
+                        Justificativa da Manutenção
+                    </label>
+
+                    {{ form.justificativa_bloqueio }}
+
+                    <div class="text-danger small">
+                        {{ form.justificativa_bloqueio.errors.0 }}
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-end flex-wrap gap-2 mt-4">
+
+                    <a href="{% url 'painel_laboratorios_ti' %}"
+                       class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-success fw-semibold px-4">
+                        Cadastrar Laboratório
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

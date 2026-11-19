@@ -1,0 +1,664 @@
+
+{% extends 'agendamentos/base.html' %}
+
+{% block content %}
+
+{% now "Y-m-d" as hoje_iso %}
+
+<!-- Calendário interativo Flatpickr. -->
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
+<style>
+    /* Mantém o campo de observações alinhado aos demais. */
+    #id_descricao {
+        height: 38px !important;
+        min-height: 38px !important;
+        resize: none;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow border-0">
+
+                <!-- Título do formulário. -->
+                <div class="card-header
+                            bg-primary text-white
+                            py-3 text-center">
+
+                    <h5 class="mb-0 fw-bold">
+                        Solicitar Reserva: {{ laboratorio.nome }}
+                    </h5>
+
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form method="POST" id="form-reserva">
+
+                        {% csrf_token %}
+
+                        <!-- Erros gerais da validação do Django. -->
+                        {% if form.non_field_errors %}
+
+                            <div class="alert alert-danger
+                                        shadow-sm mb-4"
+                                 role="alert">
+
+                                <h6 class="fw-bold mb-1">
+                                    Atenção aos dados da reserva:
+                                </h6>
+
+                                {% for error in form.non_field_errors %}
+                                    <div class="fw-bold small">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                        {% endif %}
+
+                        <!-- ==================================================
+                             1. DADOS DA ATIVIDADE
+                             ================================================== -->
+
+                        <h6 class="fw-bold text-secondary
+                                   border-bottom pb-2 mb-3">
+
+                            Dados da Atividade
+
+                        </h6>
+
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label
+                                              fw-semibold text-dark">
+                                    {{ form.professor.label }}
+                                </label>
+
+                                {{ form.professor }}
+
+                                <div class="text-danger small">
+                                    {{ form.professor.errors.0 }}
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label
+                                              fw-semibold text-dark">
+                                    {{ form.curso.label }}
+                                </label>
+
+                                {{ form.curso }}
+
+                                <div class="text-danger small">
+                                    {{ form.curso.errors.0 }}
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <label class="form-label
+                                              fw-semibold text-dark">
+                                    {{ form.disciplina.label }}
+                                </label>
+
+                                {{ form.disciplina }}
+
+                                <div class="text-danger small">
+                                    {{ form.disciplina.errors.0 }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- ==================================================
+                             2. DEFINIÇÃO DAS DATAS
+                             ================================================== -->
+
+                        <h6 class="fw-bold text-secondary
+                                   border-bottom pb-2 mb-3">
+
+                            Definição de Datas
+
+                        </h6>
+
+                        <!-- Seleção da modalidade de agendamento. -->
+                        <div class="mb-3 px-2">
+
+                            {% for radio in form.modo_reserva %}
+
+                                <div class="form-check form-check-inline">
+
+                                    {{ radio.tag }}
+
+                                    <label
+                                        class="form-check-label
+                                               fw-bold text-dark"
+                                        for="{{ radio.id_for_label }}"
+                                    >
+                                        {{ radio.choice_label }}
+                                    </label>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                        <!-- ==================================================
+                             2.1 RESERVA EM MÚLTIPLAS DATAS
+                             ================================================== -->
+
+                        <div id="bloco-multiplas" class="mb-4">
+
+                            <label class="form-label
+                                          fw-semibold text-primary">
+
+                                {{ form.datas_selecionadas.label }}
+
+                            </label>
+
+                            {{ form.datas_selecionadas }}
+
+                            <div class="form-text">
+
+                                Selecione uma ou mais datas a partir de hoje.
+                                As datas ocupadas não poderão ser escolhidas.
+
+                            </div>
+
+                            <div class="text-danger small">
+                                {{ form.datas_selecionadas.errors.0 }}
+                            </div>
+
+                        </div>
+
+                        <!-- ==================================================
+                             2.2 RESERVA SEMESTRAL
+                             ================================================== -->
+
+                        <div
+                            id="bloco-semestre"
+                            class="p-3 bg-light rounded border mb-4"
+                            style="display: none;"
+                        >
+
+                            <div class="row g-3">
+
+                                <div class="col-md-4">
+
+                                    <label class="form-label
+                                                  fw-semibold text-primary">
+                                        {{ form.dia_semana.label }}
+                                    </label>
+
+                                    {{ form.dia_semana }}
+
+                                </div>
+
+                                <div class="col-md-4">
+
+                                    <label class="form-label
+                                                  fw-semibold text-dark">
+                                        {{ form.data_inicio_semestre.label }}
+                                    </label>
+
+                                    {{ form.data_inicio_semestre }}
+
+                                </div>
+
+                                <div class="col-md-4">
+
+                                    <label class="form-label
+                                                  fw-semibold text-dark">
+                                        {{ form.data_fim_semestre.label }}
+                                    </label>
+
+                                    {{ form.data_fim_semestre }}
+
+                                </div>
+
+                            </div>
+
+                            <div class="form-text mt-2">
+                                O período deve começar hoje ou em uma data
+                                futura. Não são permitidas datas anteriores.
+                            </div>
+
+                            <div class="text-danger small mt-2">
+
+                                {{ form.data_inicio_semestre.errors.0 }}
+                                {{ form.data_fim_semestre.errors.0 }}
+                                {{ form.dia_semana.errors.0 }}
+
+                            </div>
+
+                        </div>
+
+                        <!-- ==================================================
+                             3. HORÁRIOS E CAPACIDADE
+                             ================================================== -->
+
+                        <h6 class="fw-bold text-secondary
+                                   border-bottom pb-2 mb-3">
+
+                            Horários e Capacidade
+
+                        </h6>
+
+                        <div class="row g-3 mb-4">
+
+                            <!-- Turno da aula. -->
+                            <div class="col-md-4">
+
+                                <label class="form-label
+                                              fw-semibold text-dark">
+                                    {{ form.turno.label }}
+                                </label>
+
+                                {{ form.turno }}
+
+                                <div class="text-danger small">
+                                    {{ form.turno.errors.0 }}
+                                </div>
+
+                            </div>
+
+                            <!-- Horário de início. -->
+                            <div class="col-md-4">
+
+                                <label class="form-label
+                                              fw-semibold text-dark">
+                                    {{ form.horario_inicio.label }}
+                                </label>
+
+                                {{ form.horario_inicio }}
+
+                                <div class="text-danger small">
+                                    {{ form.horario_inicio.errors.0 }}
+                                </div>
+
+                            </div>
+
+                            <!-- Horário de término. -->
+                            <div class="col-md-4">
+
+                                <label class="form-label
+                                              fw-semibold text-dark">
+                                    {{ form.horario_fim.label }}
+                                </label>
+
+                                {{ form.horario_fim }}
+
+                                <div class="text-danger small">
+                                    {{ form.horario_fim.errors.0 }}
+                                </div>
+
+                            </div>
+
+                            <!-- Aviso sobre os limites do turno. -->
+                            <div class="col-12">
+
+                                <div
+                                    id="aviso-horario"
+                                    class="form-text fw-semibold"
+                                >
+                                    Selecione um turno para verificar
+                                    os horários permitidos.
+                                </div>
+
+                            </div>
+
+                            <!-- Quantidade de alunos. -->
+                            <div class="col-md-4">
+
+                                <label class="form-label
+                                              fw-semibold text-dark">
+                                    {{ form.quantidade_alunos.label }}
+                                </label>
+
+                                {{ form.quantidade_alunos }}
+
+                                <div class="text-danger small">
+                                    {{ form.quantidade_alunos.errors.0 }}
+                                </div>
+
+                            </div>
+
+                            <!-- Observações e softwares necessários. -->
+                            <div class="col-md-8">
+
+                                <label class="form-label
+                                              fw-semibold text-dark">
+                                    {{ form.descricao.label }}
+                                </label>
+
+                                {{ form.descricao }}
+
+                                <div class="text-danger small">
+                                    {{ form.descricao.errors.0 }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- ==================================================
+                             4. CAMPOS OCULTOS
+                             ================================================== -->
+
+                        <div class="d-none">
+                            {{ form.tipo_reserva }}
+                        </div>
+
+                        <!-- ==================================================
+                             5. BOTÕES
+                             ================================================== -->
+
+                        <div class="d-grid gap-2 mt-4">
+
+                            <button
+                                type="submit"
+                                class="btn btn-success fw-bold py-2"
+                            >
+                                Salvar Agendamentos
+                            </button>
+
+                            <a
+                                href="{% url 'lista_laboratorios' %}"
+                                class="btn btn-outline-secondary"
+                            >
+                                Cancelar Operação
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==============================================================
+     6. REGRAS DINÂMICAS DA INTERFACE
+     ============================================================== -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ----------------------------------------------------------
+    // 1. CALENDÁRIO DE MÚLTIPLAS DATAS
+    // ----------------------------------------------------------
+
+    const hoje = "{{ hoje_iso }}";
+
+    const dataPreSelecionada =
+        "{{ data_pre_selecionada|default:''|escapejs }}";
+
+    const campoDatas = document.getElementById(
+        "id_datas_selecionadas"
+    );
+
+    // Preserva as datas preenchidas quando o formulário
+    // retorna com algum erro de validação.
+    const datasDoFormulario = campoDatas
+        ? campoDatas.value
+        : "";
+
+    // Aceita a data da consulta anterior somente se ela
+    // não for anterior à data atual.
+    let datasIniciais = null;
+
+    if (datasDoFormulario) {
+        datasIniciais = datasDoFormulario;
+    } else if (
+        dataPreSelecionada &&
+        dataPreSelecionada >= hoje
+    ) {
+        datasIniciais = dataPreSelecionada;
+    }
+
+    flatpickr("#id_datas_selecionadas", {
+
+        mode: "multiple",
+
+        // Formato enviado para o Django.
+        dateFormat: "Y-m-d",
+
+        // Mostra a data no padrão brasileiro.
+        altInput: true,
+        altFormat: "d/m/Y",
+        locale: "pt",
+
+        // Impede a seleção de datas anteriores a hoje.
+        minDate: hoje,
+
+        // Mantém as datas previamente escolhidas.
+        defaultDate: datasIniciais,
+
+        // Impede a seleção de datas já ocupadas.
+        disable: {{ datas_ocupadas|default:"[]"|safe }}
+
+    });
+
+    // ----------------------------------------------------------
+    // 2. CALENDÁRIO DO SEMESTRE
+    // ----------------------------------------------------------
+
+    const inicioSemestre = document.getElementById(
+        "id_data_inicio_semestre"
+    );
+
+    const fimSemestre = document.getElementById(
+        "id_data_fim_semestre"
+    );
+
+    // Impede datas anteriores a hoje nos dois campos.
+    if (inicioSemestre) {
+        inicioSemestre.min = hoje;
+    }
+
+    if (fimSemestre) {
+        fimSemestre.min = hoje;
+    }
+
+    // O término do semestre não pode ser anterior
+    // à data inicial escolhida.
+    function atualizarLimiteSemestre() {
+
+        if (!inicioSemestre || !fimSemestre) {
+            return;
+        }
+
+        if (
+            inicioSemestre.value &&
+            inicioSemestre.value > hoje
+        ) {
+            fimSemestre.min = inicioSemestre.value;
+        } else {
+            fimSemestre.min = hoje;
+        }
+
+    }
+
+    if (inicioSemestre) {
+        inicioSemestre.addEventListener(
+            "change",
+            atualizarLimiteSemestre
+        );
+    }
+
+    atualizarLimiteSemestre();
+
+    // ----------------------------------------------------------
+    // 3. ALTERNÂNCIA ENTRE DATAS ESPECÍFICAS E SEMESTRE
+    // ----------------------------------------------------------
+
+    const radiosModo = document.querySelectorAll(
+        'input[name="modo_reserva"]'
+    );
+
+    const blocoMultiplas = document.getElementById(
+        "bloco-multiplas"
+    );
+
+    const blocoSemestre = document.getElementById(
+        "bloco-semestre"
+    );
+
+    function toggleModos() {
+
+        const selecionado = document.querySelector(
+            'input[name="modo_reserva"]:checked'
+        );
+
+        if (!selecionado) {
+            return;
+        }
+
+        if (selecionado.value === "multiplas") {
+
+            blocoMultiplas.style.display = "block";
+            blocoSemestre.style.display = "none";
+
+        } else {
+
+            blocoMultiplas.style.display = "none";
+            blocoSemestre.style.display = "block";
+
+        }
+
+    }
+
+    radiosModo.forEach(function (radio) {
+
+        radio.addEventListener(
+            "change",
+            toggleModos
+        );
+
+    });
+
+    toggleModos();
+
+    // ----------------------------------------------------------
+    // 4. HORÁRIOS OFICIAIS DOS TURNOS
+    // ----------------------------------------------------------
+
+    const limitesTurnos = {
+
+        matutino: {
+            inicio: "08:00",
+            fim: "13:00",
+            nome: "Matutino"
+        },
+
+        vespertino: {
+            inicio: "13:00",
+            fim: "19:00",
+            nome: "Vespertino"
+        },
+
+        noturno: {
+            inicio: "19:00",
+            fim: "22:00",
+            nome: "Noturno"
+        }
+
+    };
+
+    const campoTurno = document.getElementById(
+        "id_turno"
+    );
+
+    const campoInicio = document.getElementById(
+        "id_horario_inicio"
+    );
+
+    const campoFim = document.getElementById(
+        "id_horario_fim"
+    );
+
+    const avisoHorario = document.getElementById(
+        "aviso-horario"
+    );
+
+    function atualizarHorariosPermitidos() {
+
+        if (!campoTurno || !campoInicio || !campoFim) {
+            return;
+        }
+
+        const limites = limitesTurnos[campoTurno.value];
+
+        if (!limites) {
+
+            campoInicio.removeAttribute("min");
+            campoInicio.removeAttribute("max");
+
+            campoFim.removeAttribute("min");
+            campoFim.removeAttribute("max");
+
+            avisoHorario.textContent =
+                "Selecione um turno para verificar " +
+                "os horários permitidos.";
+
+            return;
+        }
+
+        // Aplica os limites aos campos de horário.
+        campoInicio.min = limites.inicio;
+        campoInicio.max = limites.fim;
+
+        campoFim.min = limites.inicio;
+        campoFim.max = limites.fim;
+
+        // Informa os horários disponíveis.
+        avisoHorario.textContent =
+            "Turno " + limites.nome +
+            ": escolha horários entre " +
+            limites.inicio + " e " +
+            limites.fim + ".";
+
+    }
+
+    if (campoTurno) {
+
+        campoTurno.addEventListener(
+            "change",
+            atualizarHorariosPermitidos
+        );
+
+    }
+
+    // Aplica os horários corretos assim que a tela abre.
+    atualizarHorariosPermitidos();
+
+});
+</script>
+
+{% endblock %}

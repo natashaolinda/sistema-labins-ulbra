@@ -1,0 +1,71 @@
+
+# ============================================================
+# 1. AMBIENTES VIRTUAIS DO PYTHON
+# ============================================================
+
+venv/
+env/
+.venv/
+
+
+# ============================================================
+# 2. ARQUIVOS TEMPORÁRIOS DO PYTHON
+# ============================================================
+
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+
+# ============================================================
+# 3. VARIÁVEIS DE AMBIENTE E CREDENCIAIS
+# ============================================================
+
+# Protege senhas, chaves e configurações privadas.
+.env
+.env.*
+!.env.example
+
+
+# ============================================================
+# 4. BANCO DE DADOS LOCAL
+# ============================================================
+
+# Impede o envio do SQLite utilizado no desenvolvimento.
+db.sqlite3
+db.sqlite3-journal
+
+
+# ============================================================
+# 5. RELATÓRIOS E ARQUIVOS GERADOS PELO SISTEMA
+# ============================================================
+
+# PDFs e outros arquivos armazenados pelo Django.
+media/
+
+# Proteção adicional para relatórios antigos
+# que estejam fora da pasta media.
+relatorios_semestrais/
+
+
+# ============================================================
+# 6. ARQUIVOS DE SISTEMA E EDITORES
+# ============================================================
+
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+
+# ============================================================
+# 7. ARQUIVOS TEMPORÁRIOS E LOGS
+# ============================================================
+
+*.log
+*.tmp
+
+# Arquivos estáticos gerados pelo collectstatic
+staticfiles/
+
+dados_labins.json
