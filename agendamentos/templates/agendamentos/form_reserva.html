@@ -12,7 +12,7 @@
 >
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 
 <style>
     /* Mantém o campo de observações alinhado aos demais. */
@@ -407,6 +407,8 @@
      6. REGRAS DINÂMICAS DA INTERFACE
      ============================================================== -->
 
+<div id="dados-calendario-labins" data-ocupadas="{{ datas_ocupadas|default:'{}'|escape }}" hidden></div>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -442,7 +444,15 @@ document.addEventListener("DOMContentLoaded", function () {
         datasIniciais = dataPreSelecionada;
     }
 
-    flatpickr("#id_datas_selecionadas", {
+    const datasOcupadasPorTurno = JSON.parse(
+        document.getElementById("dados-calendario-labins").dataset.ocupadas
+    );
+    const seletorTurnoCalendario = document.getElementById("id_turno");
+    const datasIndisponiveis = () => (
+        datasOcupadasPorTurno[seletorTurnoCalendario?.value] || []
+    );
+
+    const calendarioReservas = flatpickr("#id_datas_selecionadas", {
 
         mode: "multiple",
 
@@ -461,9 +471,20 @@ document.addEventListener("DOMContentLoaded", function () {
         defaultDate: datasIniciais,
 
         // Impede a seleção de datas já ocupadas.
-        disable: {{ datas_ocupadas|default:"[]"|safe }}
+        disable: datasIndisponiveis()
 
     });
+
+    if (seletorTurnoCalendario) {
+        seletorTurnoCalendario.addEventListener("change", function () {
+            const bloqueadas = datasIndisponiveis();
+            calendarioReservas.set("disable", bloqueadas);
+            const disponiveis = calendarioReservas.selectedDates.filter(
+                data => !bloqueadas.includes(calendarioReservas.formatDate(data, "Y-m-d"))
+            );
+            calendarioReservas.setDate(disponiveis, true);
+        });
+    }
 
     // ----------------------------------------------------------
     // 2. CALENDÁRIO DO SEMESTRE

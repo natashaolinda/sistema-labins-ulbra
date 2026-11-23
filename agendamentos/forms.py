@@ -1,4 +1,3 @@
-
 import re
 from datetime import datetime, time, timedelta
 
@@ -349,6 +348,11 @@ class AgendamentoForm(forms.ModelForm):
                 raise forms.ValidationError(
                     'A data de início deve ser anterior '
                     'ou igual à data de término.'
+                )
+
+            if (data_fim - data_inicio).days > 180:
+                raise forms.ValidationError(
+                    'A reserva semestral deve abranger no máximo 180 dias.'
                 )
 
             dia_alvo = int(dia_semana)

@@ -1,4 +1,3 @@
-
 {% extends 'agendamentos/base.html' %}
 
 {% block content %}
@@ -191,7 +190,7 @@
 
                             <div class="mb-3">
                                 {% for software in lab.softwares.all %}
-                                    <span class="badge bg-secondary me-1 mb-1">
+                                    <span class="badge badge-software me-1 mb-1">
                                         {{ software.nome }}
                                     </span>
                                 {% empty %}

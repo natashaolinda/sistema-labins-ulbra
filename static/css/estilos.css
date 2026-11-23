@@ -91,7 +91,7 @@ h1, h2, h3, h4, h5, h6, .text-primary, .text-dark, body {
 }
 
 /* 3. Padronizar as cores das tags de Softwares (Remover coloridos do Bootstrap) */
-.card-body .badge {
+.badge-software {
     background-color: #f6efe6 !important; /* Fundo dourado bem claro */
     color: var(--ulbra-verde) !important; /* Texto no verde principal */
     border: 1px solid var(--ulbra-dourado) !important;

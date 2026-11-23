@@ -1,4 +1,3 @@
-
 import json
 from datetime import date, datetime
 from io import BytesIO
@@ -211,70 +210,73 @@ def solicitar_reserva(request, lab_id):
         laboratorio=laboratorio,
         status='C',
         data__gte=hoje
-    ).values_list('data', flat=True)
+    ).values_list('data', 'turno')
 
-    datas_ocupadas = list(set([
-        d.strftime('%Y-%m-%d')
-        for d in agendamentos_existentes
-    ]))
-
-    datas_ocupadas_json = json.dumps(datas_ocupadas)
+    # A disponibilidade é por laboratório, data e turno.
+    datas_ocupadas = {turno: [] for turno in (
+        'matutino', 'vespertino', 'noturno'
+    )}
+    for data_reserva, turno_reserva in agendamentos_existentes:
+        datas_ocupadas.setdefault(turno_reserva, []).append(
+            data_reserva.isoformat()
+        )
+    datas_ocupadas_json = json.dumps({
+        turno: sorted(set(datas))
+        for turno, datas in datas_ocupadas.items()
+    })
 
     if request.method == 'POST':
-        form = AgendamentoForm(
-            request.POST,
-            laboratorio=laboratorio
-        )
+        # O bloqueio da linha do laboratório serializa reservas concorrentes
+        # deste espaço no MySQL. A validação ocorre dentro da transação.
+        with transaction.atomic():
+            laboratorio_bloqueado = get_object_or_404(
+                Laboratorio.objects.select_for_update(), pk=lab_id
+            )
+            form = AgendamentoForm(
+                request.POST,
+                laboratorio=laboratorio_bloqueado
+            )
+            if form.is_valid() and laboratorio_bloqueado.em_manutencao:
+                form.add_error(
+                    None, 'Este laboratório está em manutenção e não aceita reservas.'
+                )
+
+            if form.is_valid():
+                datas_geradas = form.cleaned_data['lista_datas_calculadas']
+                reservas_criadas = []
+
+                for data_aula in datas_geradas:
+                    reserva = Agendamento.objects.create(
+                        laboratorio=laboratorio_bloqueado,
+                        usuario=request.user,
+                        status='C',
+                        data=data_aula,
+                        professor=form.cleaned_data['professor'],
+                        curso=form.cleaned_data['curso'],
+                        disciplina=form.cleaned_data['disciplina'],
+                        tipo_reserva=form.cleaned_data.get('tipo_reserva', 'TEMP'),
+                        quantidade_alunos=form.cleaned_data['quantidade_alunos'],
+                        turno=form.cleaned_data['turno'],
+                        horario_inicio=form.cleaned_data['horario_inicio'],
+                        horario_fim=form.cleaned_data['horario_fim'],
+                        descricao=form.cleaned_data['descricao'],
+                    )
+                    reservas_criadas.append(reserva)
+                    LogOperacao.objects.create(
+                        usuario=request.user,
+                        acao='CRIACAO',
+                        agendamento_id=reserva.id,
+                        campo_alterado=(
+                            'Agendamento em Lote' if len(datas_geradas) > 1
+                            else 'Agendamento'
+                        ),
+                        detalhe_atualizacao=(
+                            f'Reserva no {laboratorio_bloqueado.nome} '
+                            f'(Data: {data_aula:%d/%m/%Y})'
+                        ),
+                    )
 
         if form.is_valid():
-            datas_geradas = form.cleaned_data[
-                'lista_datas_calculadas'
-            ]
-
-            reservas_criadas = []
-
-            for data_aula in datas_geradas:
-                reserva = Agendamento.objects.create(
-                    laboratorio=laboratorio,
-                    usuario=request.user,
-                    status='C',
-                    data=data_aula,
-                    professor=form.cleaned_data['professor'],
-                    curso=form.cleaned_data['curso'],
-                    disciplina=form.cleaned_data['disciplina'],
-                    tipo_reserva=form.cleaned_data.get(
-                        'tipo_reserva', 'TEMP'
-                    ),
-                    quantidade_alunos=form.cleaned_data[
-                        'quantidade_alunos'
-                    ],
-                    turno=form.cleaned_data['turno'],
-                    horario_inicio=form.cleaned_data[
-                        'horario_inicio'
-                    ],
-                    horario_fim=form.cleaned_data[
-                        'horario_fim'
-                    ],
-                    descricao=form.cleaned_data['descricao']
-                )
-
-                reservas_criadas.append(reserva)
-
-                LogOperacao.objects.create(
-                    usuario=request.user,
-                    acao='CRIACAO',
-                    agendamento_id=reserva.id,
-                    campo_alterado=(
-                        'Agendamento em Lote'
-                        if len(datas_geradas) > 1
-                        else 'Agendamento'
-                    ),
-                    detalhe_atualizacao=(
-                        f"Reserva no {laboratorio.nome} "
-                        f"(Data: {data_aula.strftime('%d/%m/%Y')})"
-                    )
-                )
-
             email_remetente = settings.DEFAULT_FROM_EMAIL
             email_ti = settings.EMAIL_SUPORTE_TI
 
@@ -403,29 +405,39 @@ def reserva_sucesso(request, agendamento_id):
     )
 
 
+
 @login_required
 def meus_agendamentos(request):
-    ordem_status = Case(
-        When(status='C', then=Value(1)),
-        default=Value(2),
-        output_field=IntegerField(),
-    )
+    hoje = timezone.localdate()
 
-    agendamentos = Agendamento.objects.filter(
-        usuario=request.user
-    ).annotate(
-        prioridade=ordem_status
-    ).order_by(
-        'prioridade',
-        '-data',
-        'horario_inicio'
+    agendamentos = (
+        Agendamento.objects.filter(
+            usuario=request.user
+        )
+        .select_related('laboratorio')
+        .annotate(
+            prioridade_data=Case(
+                When(data__gte=hoje, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by(
+            'prioridade_data',
+            'data',
+            'horario_inicio',
+            'id'
+        )
     )
 
     return render(
         request,
         'agendamentos/meus_agendamentos.html',
-        {'agendamentos': agendamentos}
+        {
+            'agendamentos': agendamentos
+        }
     )
+
 
 
 @login_required
@@ -722,10 +734,14 @@ def painel_laboratorios_ti(request):
         if not _pode_gerenciar_sistema(request.user):
             raise PermissionDenied('Somente a Chefia de TI pode excluir laboratórios.')
         lab_id = (
-            request.POST.get('laboratorio_id')
+            request.POST.get('excluir_laboratorio_id')
+            or request.POST.get('laboratorio_id')
             or request.POST.get('lab_id')
             or request.POST.get('excluir_lab_id')
         )
+        if not lab_id:
+            messages.error(request, 'Selecione um laboratório para excluir.')
+            return redirect('painel_laboratorios_ti')
         laboratorio = get_object_or_404(Laboratorio, pk=lab_id)
         if Agendamento.objects.filter(laboratorio=laboratorio).exists():
             messages.error(request, 'Laboratório com histórico de reservas não pode ser excluído.')
@@ -924,7 +940,7 @@ def gerenciar_usuarios(request):
 
     usuarios = (
         User.objects.select_related('perfil')
-        .exclude(username__iexact='gabi')
+        .filter(is_superuser=False)
         .order_by('first_name', 'last_name', 'username')
     )
     return render(request, 'agendamentos/gerenciar_usuarios.html', {
@@ -1188,6 +1204,10 @@ def _criar_relatorio_excel(agendamentos, periodo):
             agendamento.quantidade_alunos,
             agendamento.get_status_display(),
         ])
+        # Campos informados pelos usuários são texto, nunca fórmulas Excel.
+        for coluna in (2, 3, 4, 5):
+            celula = aba.cell(row=aba.max_row, column=coluna)
+            celula.data_type = 's'
         aba.cell(row=aba.max_row, column=1).number_format = 'DD/MM/YYYY'
         nome = agendamento.laboratorio.nome
         reserva = resumo.setdefault(nome, {'reservas': 0, 'alunos': 0})

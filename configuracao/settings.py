@@ -1,4 +1,3 @@
-
 """
 Configurações do Sistema Labins.
 
@@ -28,10 +27,13 @@ load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.getenv(
     'SECRET_KEY',
-    'chave-padrao-insegura-fallback'
+    ''
 )
 
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+
+if not SECRET_KEY:
+    raise RuntimeError('Configure SECRET_KEY no arquivo .env ou nas variáveis de ambiente.')
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -42,6 +44,13 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     'https://*.up.railway.app',
 ]
+
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_SSL_REDIRECT = not DEBUG
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
 
 SECURE_PROXY_SSL_HEADER = (
     'HTTP_X_FORWARDED_PROTO',
