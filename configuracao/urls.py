@@ -1,6 +1,6 @@
 
 """
-FICHEIRO: configuracao/urls.py
+Arquivo: configuracao/urls.py
 
 FINALIDADE:
 Roteador principal do projeto Django.
@@ -94,22 +94,4 @@ urlpatterns = [
 # ============================================================
 
 # Não publicamos automaticamente a pasta MEDIA_ROOT.
-#
-# Antes, o Django disponibilizava os arquivos em:
-#
-# /media/relatorios_semestrais/nome_do_arquivo.pdf
-#
-# Isso poderia permitir o acesso direto ao PDF,
-# sem passar pela verificação de permissões.
-#
-# Agora, o download deve acontecer exclusivamente
-# pela função baixar_relatorio_ocupacao, definida
-# em agendamentos/views.py.
-#
-# IMPORTANTE:
-# Esta configuração controla as rotas do Django.
-# Na hospedagem, o servidor também deverá ser
-# configurado para não publicar a pasta de relatórios.
-#
-# A geração, o armazenamento e a exclusão dos
-# arquivos continuam sendo realizados normalmente.
+# Os relátorios são baixados pela view com verificação de permissão.

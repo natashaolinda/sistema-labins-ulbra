@@ -18,7 +18,7 @@ FINALIDADE: Painel do docente para consulta de reservas e cancelamento de aulas 
         </a>
     </div>
 
-    <!-- ÁREA DE DADOS: Verifica se o professor tem alguma reserva registada -->
+    <!-- ÁREA DE DADOS: Verifica se o professor tem alguma reserva registrada -->
     {% if agendamentos %}
         <div class="card shadow-sm border-0">
             <div class="card-body p-0">
@@ -36,7 +36,7 @@ FINALIDADE: Painel do docente para consulta de reservas e cancelamento de aulas 
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- LOOP: Itera sobre todas as reservas do utilizador logado -->
+                            <!-- LOOP: Itera sobre todas as reservas do usuário logado -->
                             {% for ag in agendamentos %}
                             <tr>
                                 <!-- COLUNA 1: Nome e Localização -->
@@ -132,7 +132,7 @@ FINALIDADE: Painel do docente para consulta de reservas e cancelamento de aulas 
                                             {% endif %}
                                         </div>
                                         
-                                    <!-- LÓGICA DE STATUS: Se o utilizador logado cancelou ('X') -->
+                                    <!-- LÓGICA DE STATUS: Se o usuário logado cancelou ('X') -->
                                     {% elif ag.status == 'X' %}
                                         <span class="badge bg-danger py-2 px-2">Cancelado (Docente)</span>
                                         
@@ -153,7 +153,7 @@ FINALIDADE: Painel do docente para consulta de reservas e cancelamento de aulas 
     {% else %}
         <div class="card shadow-sm border-0 text-center py-5">
             <div class="card-body">
-                <h5 class="fw-bold text-secondary">Ainda não possui agendamentos registados.</h5>
+                <h5 class="fw-bold text-secondary">Você ainda não possui agendamentos.</h5>
                 <p class="text-muted">Consulte a disponibilidade dos laboratórios e garanta o espaço para as suas aulas.</p>
                 <a href="{% url 'lista_laboratorios' %}" class="btn btn-primary mt-2">
                     Consultar e Reservar Laboratórios

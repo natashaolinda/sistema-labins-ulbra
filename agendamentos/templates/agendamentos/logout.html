@@ -8,7 +8,7 @@
         <h3 class="fw-bold text-dark mb-2">Deseja mesmo sair?</h3>
         <p class="text-muted small mb-4">Você será desconectado da sua sessão atual no sistema da Ulbra.</p>
 
-        <!-- Formulário de Logout (POST) apontando para a nossa URL personalizada -->
+        <!-- Formulário de Logout (POST) -->
         <form method="post" action="{% url 'logout_customizado' %}">
             {% csrf_token %}
             <div class="d-flex gap-2 justify-content-center">

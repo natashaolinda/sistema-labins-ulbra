@@ -313,7 +313,7 @@ def solicitar_reserva(request, lab_id):
                 send_mail(
                     assunto,
                     (
-                        "Novo agendamento registado "
+                        "Novo agendamento registrado "
                         f"no Sistema Labins.\n\n{corpo_base}"
                     ),
                     email_remetente,
@@ -329,7 +329,7 @@ def solicitar_reserva(request, lab_id):
                         ),
                         (
                             f"Olá, {form.cleaned_data['professor']}!\n"
-                            "A sua reserva foi confirmada "
+                            "Sua reserva foi confirmada "
                             f"com sucesso.\n\n{corpo_base}"
                         ),
                         email_remetente,
@@ -516,7 +516,7 @@ def cancelar_reserva(request, agendamento_id):
 
         messages.success(
             request,
-            'Reserva cancelada com sucesso. Espaço libertado.'
+            'Reserva cancelada com sucesso. Laboratório liberado.'
         )
 
         return redirect('meus_agendamentos')

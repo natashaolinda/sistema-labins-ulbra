@@ -290,10 +290,6 @@ LOGIN_URL = '/accounts/google/login/'
 # 12. CONFIGURAÇÕES DO DJANGO-ALLAUTH
 # ==============================================================================
 
-# Substitui a configuração descontinuada ACCOUNT_EMAIL_REQUIRED.
-# O endereço de e-mail continua sendo um campo obrigatório.
-# Os demais campos preservam a configuração padrão do Allauth.
-
 ACCOUNT_SIGNUP_FIELDS = [
     'email*',
     'username*',

@@ -1,5 +1,5 @@
 """
-FICHEIRO: agendamentos/admin.py
+Arquivo: agendamentos/admin.py
 FINALIDADE: Configuração e personalização da interface de administração nativa do Django (Django Admin).
 RESPONSABILIDADES:
 1. Mapear a gestão dos laboratórios e softwares da instituição.
@@ -48,7 +48,7 @@ admin.site.register(User, CustomUserAdmin)
 
 
 # ==============================================================================
-# 2. GESTÃO ADMINISTRATIVA DE SOFTWARES (NOVIDADE)
+# 2. GESTÃO ADMINISTRATIVA DE SOFTWARES 
 # ==============================================================================
 @admin.register(Software)
 class SoftwareAdmin(admin.ModelAdmin):
@@ -102,7 +102,7 @@ class LaboratorioAdmin(admin.ModelAdmin):
                 'justificativa_bloqueio'
             )
         }),
-        ('Softwares Instalados (Matriz TCC)', {
+        ('Softwares Instalados', {
             'description': "Selecione os softwares disponíveis neste laboratório (gestão relacional):",
             'fields': ('softwares',),
         }),
@@ -111,7 +111,7 @@ class LaboratorioAdmin(admin.ModelAdmin):
         }),
     )
 
-    # Torna a seleção de softwares numa caixa de escolha múltipla intuitiva no Admin
+    # Torna a seleção de softwares em uma caixa de escolha múltipla intuitiva no Admin
     filter_horizontal = ('softwares',)
 
 

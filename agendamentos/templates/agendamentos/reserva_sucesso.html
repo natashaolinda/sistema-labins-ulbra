@@ -1,6 +1,6 @@
 <!-- 
 ARQUIVO: agendamentos/templates/agendamentos/reserva_sucesso.html
-FINALIDADE: Exibir o comprovativo digital ("recibo") após uma reserva bem-sucedida.
+FINALIDADE: Exibir o comprovante digital ("recibo") após uma reserva bem-sucedida.
 HERANÇA: Estende o template base (herda navbar, estilos globais e rodapé).
 -->
 {% extends 'agendamentos/base.html' %}
@@ -40,7 +40,7 @@ sobrepondo qualquer classe padrão azul (primary) ou verde claro (success) do Bo
         <div class="col-md-7 col-lg-6">
             
             <div class="card shadow border-0">
-                <!-- CABEÇALHO DO COMPROVANTE: Utiliza a nova classe cabecalho-ulbra para garantir a cor institucional -->
+                <!-- CABEÇALHO DO COMPROVANTE: Utiliza a classe cabecalho-ulbra para garantir a cor institucional -->
                 <div class="card-header cabecalho-ulbra text-center py-4">
                     <div class="display-4 mb-2">✓</div>
                     <h3 class="fw-bold mb-1">Agendamento Confirmado!</h3>
@@ -120,7 +120,7 @@ sobrepondo qualquer classe padrão azul (primary) ou verde claro (success) do Bo
 
                     <!-- PAINEL DE INFRAESTRUTURA E DIRETRIZES TÉCNICAS DA TI -->
                     <div class="alert alert-light border shadow-sm rounded-3 mb-4">
-                        <h6 class="fw-bold text-dark mb-2">📌 Informações Importantes sobre o Espaço:</h6>
+                        <h6 class="fw-bold text-dark mb-2"> Informações Importantes sobre o Espaço:</h6>
                         
                         <ul class="mb-0 ps-3 small text-secondary">
                             <!-- Capacidade máxima estática cadastrada no modelo do laboratório -->
@@ -166,7 +166,7 @@ sobrepondo qualquer classe padrão azul (primary) ou verde claro (success) do Bo
 
                         <!-- Função JavaScript nativa para disparar a janela de impressão (Geração de PDF ou Impressora física) -->
                         <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
-                            🖨 Imprimir Comprovante
+                             Imprimir Comprovante
                         </button>
                     </div>
 

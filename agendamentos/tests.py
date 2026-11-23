@@ -107,7 +107,7 @@ class ReservasTestes(TestCase):
             laboratorio=self.laboratorio,
         )
         self.assertFalse(formulario.is_valid())
-        self.assertIn('190 dias', str(formulario.errors))
+        self.assertIn('180 dias', str(formulario.errors))
 
     def test_exclusao_de_laboratorio_sem_historico(self):
         self.client.force_login(self.chefe)
