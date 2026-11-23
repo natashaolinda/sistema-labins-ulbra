@@ -1,8 +1,8 @@
-# Sistema Labins — ULBRA Palmas
+# Sistema Labins - ULBRA Palmas
 
 **Sistema Integrado de Gestão e Agendamento de Laboratórios de TI e Espaços Acadêmicos**
 
-Projeto desenvolvido para a disciplina **Projeto Tecnológico em Desenvolvimento de Sistemas**, do Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas da Universidade Luterana do Brasil (ULBRA).
+Projeto desenvolvido para a disciplina **Projeto Tecnológico em Desenvolvimento de Sistemas**, do Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas da Universidade Luterana do Brasil(ULBRA).
 
 **Acadêmica:** Gabriela Natasha Bandeira Olinda  
 **Aplicação publicada:** https://sistema-labins-production.up.railway.app/sistema/  
@@ -107,7 +107,7 @@ A relação completa das bibliotecas Python e suas versões está disponível no
 A aplicação foi estruturada conforme a organização de projetos Django, separando as configurações, os modelos de dados, os formulários, as regras de negócio e os templates.
 
 ```text
-sistema-labins/
+sistema-labins-ulbra/
 ├── agendamentos/
 │   ├── migrations/                  # Histórico de alterações do banco
 │   ├── templates/agendamentos/      # Páginas HTML do sistema
@@ -243,7 +243,7 @@ O repositório público tem finalidade acadêmica e contém o código-fonte nece
 
 ## 11. Identificação acadêmica
 
-**Instituição:** Universidade Luterana do Brasil — ULBRA  
+**Instituição:** Universidade Luterana do Brasil - ULBRA  
 **Curso:** Análise e Desenvolvimento de Sistemas  
 **Disciplina:** Projeto Tecnológico em Desenvolvimento de Sistemas  
 **Projeto:** Sistema Integrado de Gestão e Agendamento de Laboratórios de TI e Espaços Acadêmicos  
